@@ -1,228 +1,962 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>2048</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <!-- Eitaa SDK -->
+  <script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
 
-<!-- SDK رسمی ایتا (باید قبل از هرچیز لود شود) -->
-<script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  try {
+    if (window.Eitaa && Eitaa.WebApp) {
+      Eitaa.WebApp.ready();
+      if (Eitaa.WebApp.expand) Eitaa.WebApp.expand();
 
-<title>منوی بازی‌ها</title>
+      Eitaa.WebApp.onEvent('backButtonClicked', () => {
+        if (history.length > 1) history.back();
+        else Eitaa.WebApp.close();
+      });
+    }
+  } catch(e) { console.warn(e); }
+});
+</script>
 
-<style>
-/* ———— تمام استایل‌های نسخه اصلی ———— */
+  <style>
+    *, 
+    *::before, 
+    *::after {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-:root{
-  --card-bg:#fff;
-  --page-bg:#f0f2f5;
-  --accent:#2b6cb0;
-  --text:#222;
-}
-*{box-sizing:border-box;}
-body{
-  margin:0;
-  font-family:"Segoe UI", Tahoma, Arial, sans-serif;
-  background:var(--page-bg);
-  color:var(--text);
-  overflow-x:hidden;
-}
-.container{max-width:1200px;margin:0 auto;padding:20px;}
-header{text-align:center;margin-bottom:18px;}
-h1#pagetitle{margin:6px 0 0 0;font-size:28px;transition: color .3s;}
-p{margin:6px 0 12px 0;font-size:16px;}
-.menu{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;perspective:1000px;}
-.card{
-  width:180px;
-  background:linear-gradient(145deg,#fff,#e6e9f0);
-  border-radius:20px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.06), 0 12px 24px rgba(0,0,0,0.1);
-  overflow:hidden;
-  text-decoration:none;
-  color:inherit;
-  cursor:pointer;
-  transition:transform .35s ease,box-shadow .35s ease,background .5s;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  padding:12px;
-  opacity:0;
-  transform:translateY(30px);
-  background-size:200% 200%;
-  animation:gradientShift 6s ease infinite;
-}
-@keyframes gradientShift{
-  0%{background-position:0% 50%;}
-  50%{background-position:100% 50%;}
-  100%{background-position:0% 50%;}
-}
-.card.show{opacity:1;transform:translateY(0);}
-.card:hover{
-  transform:translateY(-6px) rotateX(3deg) rotateY(3deg) scale(1.05);
-  box-shadow:0 16px 32px rgba(0,0,0,0.2);
-}
-.image-box{
-  width:100%;height:130px;border-radius:12px;
-  display:flex;align-items:center;justify-content:center;
-  text-align:center;padding:6px;
-}
-.label{font-weight:600;font-size:18px;margin-top:6px;}
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+    }
 
-.page{display:none;}
-.active{display:block;}
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #171a1f;
+      color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
 
-.iframe-wrap{width:100%;height:70vh;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,0.06);position:relative;}
-.back{display:inline-block;margin:12px 6px 30px 6px;padding:8px 14px;border-radius:10px;background:var(--accent);color:#fff;text-decoration:none;font-weight:600;cursor:pointer;}
-.fullscreen-btn{padding:8px 14px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;margin:12px 0 20px;}
+    #app {
+      width: 100vw;
+      height: 100vh;
+      padding: 14px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-@media(max-width:600px){.card{width:46%;}}
+    .game-shell {
+      width: 100%;
+      max-width: 420px;
+      height: 100%;
+      max-height: 720px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+    }
 
-#splash{
-  position:fixed;top:0;left:0;width:100%;height:100%;
-  background:linear-gradient(135deg,#fdfbfb,#ebedee);
-  display:flex;align-items:center;justify-content:center;
-  z-index:9999;opacity:1;
-}
-#splash.hidden{opacity:0;pointer-events:none;transition:opacity .8s;}
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
 
-.logo-container{display:flex;align-items:center;font-size:72px;font-weight:bold;}
-.icon-box{
-  width:100px;height:100px;border:8px solid #007bff;border-radius:20px;
-  margin-left:15px;color:#007bff;display:flex;align-items:center;justify-content:center;
-  animation:bounce 1.2s infinite alternate;
-}
-@keyframes bounce{
-  0%{transform:scale(1) translateY(0);}
-  50%{transform:scale(1.1) translateY(-12px);}
-  100%{transform:scale(1) translateY(0);}
-}
-.text-arvin{color:#102341;letter-spacing:2px;text-shadow:0 2px 6px rgba(0,0,0,0.2);}
-</style>
+    .scores {
+      display: flex;
+      gap: 8px;
+    }
+
+    .score-box {
+      background: linear-gradient(135deg, #262a33, #1e2229);
+      border-radius: 12px;
+      padding: 6px 10px;
+      min-width: 76px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.45);
+    }
+
+    .score-box .label {
+      font-size: 11px;
+      opacity: 0.75;
+    }
+
+    .score-box .value {
+      font-size: 17px;
+      margin-top: 2px;
+      font-weight: 700;
+    }
+
+    .primary-btn,
+    .ghost-btn {
+      border-radius: 999px;
+      border: none;
+      font-size: 13px;
+      padding: 9px 16px;
+      cursor: pointer;
+      min-width: 80px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.12s ease;
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, #f2a33b, #f17f2d);
+      color: #20130b;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.6);
+    }
+
+    .primary-btn:active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+
+    .ghost-btn {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.14);
+      color: #f5f5f5;
+    }
+
+    .ghost-btn:active {
+      transform: translateY(1px) scale(0.98);
+    }
+
+    /* Game area */
+    .game-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .grid {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      aspect-ratio: 1 / 1;
+      background: radial-gradient(circle at top left, #252932, #12151b);
+      border-radius: 22px;
+      padding: 10px;
+      box-shadow:
+        0 20px 40px rgba(0,0,0,0.7),
+        inset 0 0 0 1px rgba(255,255,255,0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .grid-row {
+      display: flex;
+      flex: 1;
+      gap: 10px;
+    }
+
+    .grid-cell {
+      flex: 1;
+      background: rgba(255,255,255,0.03);
+      border-radius: 14px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+
+    /* Tiles */
+    .tiles {
+      position: absolute;
+      inset: 10px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .tile {
+      position: relative;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #1b1b1b;
+      font-size: 24px;
+      box-shadow:
+        0 10px 18px rgba(0,0,0,0.65),
+        inset 0 0 0 1px rgba(255,255,255,0.12);
+      transform: scale(1);
+      transition:
+        transform 0.12s ease-out,
+        box-shadow 0.12s ease-out,
+        background 0.15s ease,
+        color 0.15s ease;
+    }
+
+    @media (max-width: 380px) {
+      .tile {
+        font-size: 20px;
+      }
+    }
+
+    .tile.new {
+      animation: pop-in 180ms ease-out;
+    }
+
+    .tile.merge {
+      animation: merge-pulse 160ms ease-out;
+    }
+
+    @keyframes pop-in {
+      0% { transform: scale(0.2); opacity: 0; }
+      70% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes merge-pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
+    /* Tile colors */
+    .tile-2    { background: linear-gradient(135deg, #f1eee6, #e7e1cf); color: #403a2b; }
+    .tile-4    { background: linear-gradient(135deg, #f1e5c8, #e4d3ac); color: #403321; }
+    .tile-8    { background: linear-gradient(135deg, #f5b27a, #f18b3f); color: #241007; }
+    .tile-16   { background: linear-gradient(135deg, #f5966f, #ec6b3d); color: #230b05; }
+    .tile-32   { background: linear-gradient(135deg, #f46a5a, #e33c3c); color: #230707; }
+    .tile-64   { background: linear-gradient(135deg, #f6444b, #d62838); color: #fff7f4; }
+    .tile-128  { background: linear-gradient(135deg, #f6d26b, #f0b938); color: #231800; }
+    .tile-256  { background: linear-gradient(135deg, #f6c64f, #f0ac29); color: #231800; }
+    .tile-512  { background: linear-gradient(135deg, #f7c13d, #f0a316); color: #231800; }
+    .tile-1024 { background: linear-gradient(135deg, #f7ba2c, #f0950b); color: #231800; }
+    .tile-2048 { background: linear-gradient(135deg, #f8b121, #f08b05); color: #231800; }
+    .tile-super {
+      background: linear-gradient(135deg, #46c2c5, #2e9faa);
+      color: #071214;
+    }
+
+    /* Message overlay */
+    .message {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .message.hidden {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .message:not(.hidden) {
+      pointer-events: auto;
+    }
+
+    .message::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 22px;
+      background: radial-gradient(circle at center, rgba(0,0,0,0.5), rgba(0,0,0,0.85));
+      backdrop-filter: blur(7px);
+    }
+
+    .message-content {
+      position: relative;
+      z-index: 1;
+      background: linear-gradient(135deg, #252932, #171a21);
+      padding: 18px 16px 14px;
+      border-radius: 18px;
+      box-shadow: 0 18px 32px rgba(0,0,0,0.8);
+      width: 80%;
+      max-width: 260px;
+      text-align: center;
+    }
+
+    .message-text {
+      font-size: 18px;
+      margin-bottom: 14px;
+      font-weight: 600;
+    }
+
+    .message-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .message.hidden .message-content {
+      transform: translateY(8px) scale(0.96);
+      opacity: 0;
+    }
+
+    .message:not(.hidden) {
+      opacity: 1;
+    }
+
+    .message:not(.hidden) .message-content {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      transition: transform 0.18s ease, opacity 0.18s ease;
+    }
+
+    /* Remove focus outlines on buttons for mobile feel but keep for keyboard */
+    button:focus-visible {
+      outline: 2px solid #f2a33b;
+      outline-offset: 2px;
+    }
+  </style>
 </head>
-
 <body>
+  <div id="app">
+    <div class="game-shell">
+      <header class="top-bar">
+        <div class="scores">
+          <div class="score-box">
+            <div class="label">امتیاز</div>
+            <div id="score" class="value">0</div>
+          </div>
+          <div class="score-box">
+            <div class="label">بهترین</div>
+            <div id="best-score" class="value">0</div>
+          </div>
+        </div>
+        <button id="new-game" class="primary-btn">بازی جدید</button>
+      </header>
 
-<!-- Splash -->
-<div id="splash">
-  <div class="logo-container">
-    <div class="icon-box">&lt;/&gt;</div>
-    <div class="text-arvin">ARVIN</div>
-  </div>
-</div>
+      <div class="game-area">
+        <div class="grid">
+          <!-- 4x4 cells -->
+          <div class="grid-row">
+            <div class="grid-cell"></div>
+            <div class="grid-cell"></div>
+            <div class="grid-cell"></div>
+            <div class="grid-cell"></div>
+          </div>
+          <div class="grid-row">
+            <div class="grid-cell"></div>
+            <div class="grid-cell"></div>
+            <div class="grid-cell"></div>
+            <div class="grid-cell"></div>
+          </div>
+          <div class="grid-row">
+            <div class="grid-cell"></div>
+            <div class="grid-cell"></div>
+            <div class="grid-cell"></div>
+            <div class="grid-cell"></div>
+          </div>
+          <div class="grid-row">
+            <div class="grid-cell"></div>
+            <div class="grid-cell"></div>
+            <div class="grid-cell"></div>
+            <div class="grid-cell"></div>
+          </div>
+          <div id="tiles-container" class="tiles"></div>
 
-<div class="container">
-
-<header>
-  <h1 id="pagetitle">منوی بازی‌ها</h1>
-  <p>روی کارت بازی موردنظر کلیک کنید</p>
-</header>
-
-<!-- صفحه اصلی -->
-<div id="menu" class="active page">
-  <div class="menu">
-
-    <!-- کارت دوز (دقیقاً نسخه اصلی تو) -->
-    <div class="card" id="card1" onclick="openDoz()">
-      <div class="image-box">
-        <div class="board" style="display:grid; grid-template-columns:repeat(3,50px); grid-template-rows:repeat(3,50px); gap:5px; background:#c79a5d; padding:8px; border-radius:8px; box-shadow:0 0 5px #6a4b2c; transform:scale(0.85);">
-          <div class="cell o" style="background:#e2b574;border-radius:5px;display:flex;justify-content:center;align-items:center;font-size:20px;font-weight:bold;color:#1da3dd;text-shadow:1px 1px 2px #0b5f8a">O</div>
-          <div class="cell x" style="background:#e2b574;border-radius:5px;display:flex;justify-content:center;align-items:center;font-size:20px;font-weight:bold;color:#e63737;text-shadow:1px 1px 2px #742020">X</div>
-          <div class="cell x" style="background:#e2b574;border-radius:5px;display:flex;justify-content:center;align-items:center;font-size:20px;font-weight:bold;color:#e63737;text-shadow:1px 1px 2px #742020">X</div>
-          <div class="cell x" style="background:#e2b574;border-radius:5px;display:flex;justify-content:center;align-items:center;font-size:20px;font-weight:bold;color:#e63737;text-shadow:1px 1px 2px #742020">X</div>
-          <div class="cell o" style="background:#e2b574;border-radius:5px;display:flex;justify-content:center;align-items:center;font-size:20px;font-weight:bold;color:#1da3dd;text-shadow:1px 1px 2px #0b5f8a">O</div>
-          <div class="cell o" style="background:#e2b574;border-radius:5px;display:flex;justify-content:center;align-items:center;font-size:20px;font-weight:bold;color:#1da3dd;text-shadow:1px 1px 2px #0b5f8a">O</div>
-          <div class="cell o" style="background:#e2b574;border-radius:5px;display:flex;justify-content:center;align-items:center;font-size:20px;font-weight:bold;color:#1da3dd;text-shadow:1px 1px 2px #0b5f8a">O</div>
-          <div class="cell x" style="background:#e2b574;border-radius:5px;display:flex;justify-content:center;align-items:center;font-size:20px;font-weight:bold;color:#e63737;text-shadow:1px 1px 2px #742020">X</div>
-          <div class="cell x" style="background:#e2b574;border-radius:5px;display:flex;justify-content:center;align-items:center;font-size:20px;font-weight:bold;color:#e63737;text-shadow:1px 1px 2px #742020">X</div>
+          <div id="message" class="message hidden">
+            <div class="message-content">
+              <div id="message-text" class="message-text"></div>
+              <div class="message-actions">
+                <button id="keep-going" class="ghost-btn">ادامه</button>
+                <button id="try-again" class="primary-btn">دوباره</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="label">دوز</div>
+
     </div>
-
-    <!-- کارت 2048 -->
-    <div class="card" onclick="openPage('game2','2048')">
-      <div class="image-box">
-        <svg width="100%" height="130px" viewBox="0 0 200 200">
-          <rect width="200" height="200" rx="25" fill="#f7c948"/>
-          <text x="50%" y="55%" text-anchor="middle" font-size="64" fill="#fff" font-weight="bold">2048</text>
-        </svg>
-      </div>
-      <div class="label">۲۰۴۸</div>
-    </div>
-
-    <div class="card" onclick="openPage('comingsoon','به‌زودی')">
-      <div class="image-box">به‌زودی</div>
-      <div class="label">به‌زودی</div>
-    </div>
-
   </div>
-</div>
 
-<!-- صفحه 2048 -->
-<div id="game2" class="page">
-  <button class="fullscreen-btn" onclick="toggleFull('wrap2')">تمام صفحه</button>
-  <div class="iframe-wrap" id="wrap2">
-    <iframe src="https://pixelforge-ux.github.io/2048/" allowfullscreen style="width:100%;height:100%;border:0;"></iframe>
-  </div>
-  <div style="text-align:center;"><a class="back" onclick="backMenu()">بازگشت</a></div>
-</div>
+  <script>
+    const GRID_SIZE = 4;
+    const WIN_VALUE = 2048;
 
-<!-- صفحه به‌زودی -->
-<div id="comingsoon" class="page">
-  <button class="fullscreen-btn" onclick="toggleFull('wrap3')">تمام صفحه</button>
-  <div class="iframe-wrap" id="wrap3">
-    <iframe srcdoc="<html><body style='margin:0;display:flex;justify-content:center;align-items:center;height:100vh;background:black;color:white;font-size:48px;'>به‌زودی...</body></html>" style="width:100%;height:100%;border:0;"></iframe>
-  </div>
-  <div style="text-align:center;"><a class="back" onclick="backMenu()">بازگشت</a></div>
-</div>
+    class Game2048 {
+      constructor(onChangeScore, onBestScore) {
+        this.onChangeScore = onChangeScore;
+        this.onBestScore = onBestScore;
+        this.grid = this.createEmptyGrid();
+        this.score = 0;
+        this.bestScore = this.loadBestScore();
+        this.won = false;
+        this.over = false;
+        this.keepPlaying = false;
+        this.addRandomTile();
+        this.addRandomTile();
+      }
 
+      createEmptyGrid() {
+        return Array.from({ length: GRID_SIZE }, () =>
+          Array.from({ length: GRID_SIZE }, () => 0)
+        );
+      }
+
+      loadBestScore() {
+        try {
+          const v = localStorage.getItem("bestScore2048");
+          return v ? parseInt(v, 10) || 0 : 0;
+        } catch {
+          return 0;
+        }
+      }
+
+      saveBestScore() {
+        try {
+          localStorage.setItem("bestScore2048", String(this.bestScore));
+        } catch {
+          // ignore
+        }
+      }
+
+      getAvailableCells() {
+        const cells = [];
+        for (let r = 0; r < GRID_SIZE; r++) {
+          for (let c = 0; c < GRID_SIZE; c++) {
+            if (this.grid[r][c] === 0) {
+              cells.push({ r, c });
+            }
+          }
+        }
+        return cells;
+      }
+
+      addRandomTile() {
+        const cells = this.getAvailableCells();
+        if (cells.length === 0) return false;
+        const { r, c } = cells[Math.floor(Math.random() * cells.length)];
+        this.grid[r][c] = Math.random() < 0.9 ? 2 : 4;
+        return { r, c, value: this.grid[r][c] };
+      }
+
+      canMove() {
+        if (this.getAvailableCells().length > 0) return true;
+        for (let r = 0; r < GRID_SIZE; r++) {
+          for (let c = 0; c < GRID_SIZE; c++) {
+            const v = this.grid[r][c];
+            if (r > 0 && this.grid[r - 1][c] === v) return true;
+            if (r < GRID_SIZE - 1 && this.grid[r + 1][c] === v) return true;
+            if (c > 0 && this.grid[r][c - 1] === v) return true;
+            if (c < GRID_SIZE - 1 && this.grid[r][c + 1] === v) return true;
+          }
+        }
+        return false;
+      }
+
+      move(direction) {
+        if (this.over || (this.won && !this.keepPlaying)) {
+          return { moved: false, merges: [], newTile: null };
+        }
+
+        let moved = false;
+        let merges = [];
+
+        const traverse = () => {
+          if (direction === "left" || direction === "right") {
+            for (let r = 0; r < GRID_SIZE; r++) {
+              const row = this.grid[r].slice();
+              const { newLine, mergeInfo } = this.collapseLine(row, direction === "right");
+              if (!this.linesEqual(this.grid[r], newLine)) {
+                moved = true;
+                this.grid[r] = newLine;
+                merges = merges.concat(
+                  mergeInfo.map((m) => ({
+                    from: { r, c: m.from },
+                    to: { r, c: m.to },
+                    value: m.value
+                  }))
+                );
+              }
+            }
+          } else {
+            for (let c = 0; c < GRID_SIZE; c++) {
+              const col = [];
+              for (let r = 0; r < GRID_SIZE; r++) col.push(this.grid[r][c]);
+              const { newLine, mergeInfo } = this.collapseLine(col, direction === "down");
+              for (let r = 0; r < GRID_SIZE; r++) {
+                if (this.grid[r][c] !== newLine[r]) moved = true;
+                this.grid[r][c] = newLine[r];
+              }
+              merges = merges.concat(
+                mergeInfo.map((m) => ({
+                  from: { r: m.from, c },
+                  to: { r: m.to, c },
+                  value: m.value
+                }))
+              );
+            }
+          }
+          return { moved, merges };
+        };
+
+        const result = traverse();
+
+        let newTile = null;
+        if (result.moved) {
+          newTile = this.addRandomTile();
+        }
+
+        if (!this.won && this.gridHasValue(WIN_VALUE)) {
+          this.won = true;
+        }
+        if (!this.canMove()) {
+          this.over = true;
+        }
+
+        if (this.score > this.bestScore) {
+          this.bestScore = this.score;
+          this.saveBestScore();
+          if (this.onBestScore) this.onBestScore(this.bestScore);
+        }
+        if (this.onChangeScore) this.onChangeScore(this.score);
+
+        return { moved: result.moved, merges: result.merges, newTile };
+      }
+
+      gridHasValue(val) {
+        for (let r = 0; r < GRID_SIZE; r++) {
+          for (let c = 0; c < GRID_SIZE; c++) {
+            if (this.grid[r][c] === val) return true;
+          }
+        }
+        return false;
+      }
+
+      collapseLine(line, reversed) {
+        const tiles = reversed ? line.slice().reverse() : line.slice();
+        const filtered = tiles.filter((v) => v !== 0);
+        const result = [];
+        const mergeInfo = [];
+
+        let i = 0;
+        while (i < filtered.length) {
+          if (i + 1 < filtered.length && filtered[i] === filtered[i + 1]) {
+            const mergedValue = filtered[i] * 2;
+            result.push(mergedValue);
+            this.score += mergedValue;
+            mergeInfo.push({
+              from: i + 1,
+              to: result.length - 1,
+              value: mergedValue
+            });
+            i += 2;
+          } else {
+            result.push(filtered[i]);
+            i += 1;
+          }
+        }
+        while (result.length < GRID_SIZE) result.push(0);
+
+        const lineOut = reversed ? result.slice().reverse() : result;
+        const mappedMergeInfo = mergeInfo.map((m) => {
+          if (!reversed) return m;
+          const from = GRID_SIZE - 1 - m.from;
+          const to = GRID_SIZE - 1 - m.to;
+          return { from, to, value: m.value };
+        });
+
+        return { newLine: lineOut, mergeInfo: mappedMergeInfo };
+      }
+
+      linesEqual(a, b) {
+        for (let i = 0; i < a.length; i++) {
+          if (a[i] !== b[i]) return false;
+        }
+        return true;
+      }
+
+      reset() {
+        this.grid = this.createEmptyGrid();
+        this.score = 0;
+        this.won = false;
+        this.over = false;
+        this.keepPlaying = false;
+        this.addRandomTile();
+        this.addRandomTile();
+        if (this.onChangeScore) this.onChangeScore(this.score);
+      }
+    }
+
+    // Main script (was main.js)
+    const tilesContainer = document.getElementById("tiles-container");
+    const scoreEl = document.getElementById("score");
+    const bestScoreEl = document.getElementById("best-score");
+    const msgEl = document.getElementById("message");
+    const msgTextEl = document.getElementById("message-text");
+    const newGameBtn = document.getElementById("new-game");
+    const keepGoingBtn = document.getElementById("keep-going");
+    const tryAgainBtn = document.getElementById("try-again");
+
+    let game = null;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchMoved = false;
+
+    function updateScore(score) {
+      scoreEl.textContent = score;
+    }
+
+    function updateBestScore(best) {
+      bestScoreEl.textContent = best;
+    }
+
+    function readBestScoreOnce() {
+      try {
+        const v = localStorage.getItem("bestScore2048");
+        if (v) bestScoreEl.textContent = parseInt(v, 10) || 0;
+      } catch {
+        bestScoreEl.textContent = "0";
+      }
+    }
+
+    function initGame() {
+      game = new Game2048(updateScore, updateBestScore);
+      renderGrid(game.grid, true);
+      updateScore(game.score);
+      updateBestScore(game.bestScore);
+      hideMessage();
+    }
+
+    function clearTiles() {
+      while (tilesContainer.firstChild) {
+        tilesContainer.removeChild(tilesContainer.firstChild);
+      }
+    }
+
+    function createTileElement(r, c, value, isNew = false) {
+      const tile = document.createElement("div");
+      tile.classList.add("tile");
+      tile.dataset.row = String(r);
+      tile.dataset.col = String(c);
+      tile.dataset.value = String(value);
+      const cls = value <= 2048 ? `tile-${value}` : "tile-super";
+      tile.classList.add(cls);
+      tile.textContent = value;
+      if (isNew) tile.classList.add("new");
+      return tile;
+    }
+
+    function renderGrid(grid, initial = false, newTileInfo = null) {
+      if (initial) {
+        clearTiles();
+        for (let r = 0; r < GRID_SIZE; r++) {
+          for (let c = 0; c < GRID_SIZE; c++) {
+            const v = grid[r][c];
+            if (v !== 0) {
+              const isNew =
+                newTileInfo && newTileInfo.r === r && newTileInfo.c === c;
+              const tile = createTileElement(r, c, v, isNew);
+              positionTile(tile, r, c);
+              tilesContainer.appendChild(tile);
+            }
+          }
+        }
+        return;
+      }
+
+      const existingTiles = {};
+      Array.from(tilesContainer.children).forEach((tile) => {
+        const r = parseInt(tile.dataset.row, 10);
+        const c = parseInt(tile.dataset.col, 10);
+        existingTiles[`${r},${c}`] = tile;
+      });
+
+      const toRemove = new Set();
+      for (const key in existingTiles) {
+        toRemove.add(key);
+      }
+
+      for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+          const v = grid[r][c];
+          const key = `${r},${c}`;
+          if (v === 0) continue;
+
+          if (existingTiles[key]) {
+            const tile = existingTiles[key];
+            const oldValue = parseInt(tile.dataset.value, 10);
+            if (oldValue !== v) {
+              tile.dataset.value = String(v);
+              tile.textContent = v;
+              tile.className = "tile";
+              const cls = v <= 2048 ? `tile-${v}` : "tile-super";
+              tile.classList.add(cls);
+              tile.classList.add("merge");
+              tile.addEventListener(
+                "animationend",
+                () => tile.classList.remove("merge"),
+                { once: true }
+              );
+            }
+            positionTile(tile, r, c);
+            toRemove.delete(key);
+          } else {
+            let reused = null;
+            for (const k of toRemove) {
+              const t = existingTiles[k];
+              const val = parseInt(t.dataset.value, 10);
+              if (val === v) {
+                reused = t;
+                toRemove.delete(k);
+                delete existingTiles[k];
+                break;
+              }
+            }
+            if (reused) {
+              reused.dataset.row = String(r);
+              reused.dataset.col = String(c);
+              positionTile(reused, r, c);
+            } else {
+              const isNew =
+                newTileInfo && newTileInfo.r === r && newTileInfo.c === c;
+              const tile = createTileElement(r, c, v, isNew);
+              positionTile(tile, r, c);
+              tilesContainer.appendChild(tile);
+            }
+          }
+        }
+      }
+
+      for (const key of toRemove) {
+        const tile = existingTiles[key];
+        if (tile && tile.parentNode === tilesContainer) {
+          tilesContainer.removeChild(tile);
+        }
+      }
+    }
+
+    function positionTile(tile, r, c) {
+      tile.style.gridRowStart = r + 1;
+      tile.style.gridRowEnd = r + 2;
+      tile.style.gridColumnStart = c + 1;
+      tile.style.gridColumnEnd = c + 2;
+    }
+
+    function showMessage(text, mode) {
+      msgTextEl.textContent = text;
+      msgEl.classList.remove("hidden");
+      if (mode === "win") {
+        keepGoingBtn.style.display = "inline-flex";
+      } else {
+        keepGoingBtn.style.display = "none";
+      }
+    }
+
+    function hideMessage() {
+      msgEl.classList.add("hidden");
+    }
+
+    function handleMove(direction) {
+      if (!game) return;
+      const { moved, newTile } = game.move(direction);
+
+      // If nothing moved, still add a new tile (as requested).
+      if (!moved) {
+        const added = game.addRandomTile();
+        if (added) {
+          renderGrid(game.grid, false, added || null);
+        } else {
+          // No space to add a tile — keep current grid rendered
+          renderGrid(game.grid, false, null);
+        }
+      } else {
+        renderGrid(game.grid, false, newTile || null);
+      }
+
+      if (game.won && !game.keepPlaying) {
+        showMessage(`تبریک! به ${WIN_VALUE} رسیدی 🎉`, "win");
+      } else if (game.over) {
+        showMessage("بازی تمام شد!", "lose");
+      }
+    }
+
+    /* Input handling */
+    window.addEventListener("keydown", (e) => {
+      let dir = null;
+      switch (e.key) {
+        case "ArrowUp":
+          dir = "up";
+          break;
+        case "ArrowDown":
+          dir = "down";
+          break;
+        case "ArrowLeft":
+          dir = "left";
+          break;
+        case "ArrowRight":
+          dir = "right";
+          break;
+        default:
+          break;
+      }
+      if (!dir) return;
+      e.preventDefault();
+      handleMove(dir);
+    });
+
+    const gridElement = document.querySelector(".grid");
+
+    gridElement.addEventListener(
+      "touchstart",
+      (e) => {
+        if (!e.touches || e.touches.length !== 1) return;
+        const touch = e.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+        touchMoved = false;
+      },
+      { passive: true }
+    );
+
+    gridElement.addEventListener(
+      "touchmove",
+      (e) => {
+        if (!e.touches || e.touches.length !== 1) return;
+        touchMoved = true;
+      },
+      { passive: true }
+    );
+
+    gridElement.addEventListener(
+      "touchend",
+      (e) => {
+        if (!touchMoved) return;
+
+        const touch = e.changedTouches[0];
+        const dx = touch.clientX - touchStartX;
+        const dy = touch.clientY - touchStartY;
+
+        const absDx = Math.abs(dx);
+        const absDy = Math.abs(dy);
+        const threshold = 10;
+
+        if (Math.max(absDx, absDy) < threshold) return;
+
+        let dir;
+
+        if (absDx > absDy) {
+          dir = dx > 0 ? "left" : "right";
+        } else {
+          dir = dy > 0 ? "down" : "up";
+        }
+
+        handleMove(dir);
+      },
+      { passive: true }
+    );/* Buttons */
+    newGameBtn.addEventListener("click", () => {
+      game.reset();
+      renderGrid(game.grid, true);
+      hideMessage();
+    });
+
+    tryAgainBtn.addEventListener("click", () => {
+      game.reset();
+      renderGrid(game.grid, true);
+      hideMessage();
+    });
+
+    keepGoingBtn.addEventListener("click", () => {
+      if (!game) return;
+      game.keepPlaying = true;
+      hideMessage();
+    });
+
+    /* Start */
+
+    // Eitaa WebApp integration: enable closing confirmation & viewport handling
+    window.addEventListener('load', () => {
+      try {
+        if (window.Eitaa && window.Eitaa.WebApp) {
+          Eitaa.WebApp.enableClosingConfirmation();
+          Eitaa.WebApp.onEvent('viewportChanged', (data) => {
+            const app = document.getElementById('app');
+            if (app && data && typeof data.height === 'number') {
+              app.style.height = data.height + 'px';
+            }
+          });
+        }
+      } catch (err) {
+        console.warn('Eitaa SDK check failed', err);
+      }
+    });
+
+    readBestScoreOnce();
+    initGame();
+  </script>
+  <style>
+  @keyframes goldenMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .gold-footer {
+    position: fixed;
+    bottom: 46px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 420px;
+    background: linear-gradient(270deg, #f7c13d, #f8b121, #ffd700, #f5d142);
+    background-size: 400% 400%;
+    color: #231800;
+    padding: 10px 14px;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.45);
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    animation: goldenMove 6s ease infinite;
+  }
+</style>
+
+<footer class="gold-footer">
+  کاری از سید آروین موسوی
+</footer>
+
+<!-- Promo footer -->
+<div id="promo-footer" role="button"
+     style="position:fixed;bottom:-1px;left:50%;transform:translateX(-50%);
+            width:85%;max-width:420px;background:linear-gradient(135deg,#4fc3f7,#0288d1);
+            color:#fff;padding:9px 12px;border-radius:11px;
+            box-shadow:0 4px 10px rgba(0,0,0,0.35);text-align:center;
+            font-size:13px;font-weight:700;cursor:pointer;z-index:9999;">
+  ثبت سفارش تبلیغ
 </div>
 
 <script>
-/* فعال شدن SDK بعد از لود کامل */
-document.addEventListener("DOMContentLoaded", () => {
-    EitaaWebApp.ready();
-    EitaaWebApp.expand();
-});
+(function(){
+  const promo = document.getElementById('promo-footer');
+  if(!promo) return;
 
-/* Splash Animation */
-window.onload = ()=>{
-  setTimeout(()=>{
-    document.getElementById("splash").classList.add("hidden");
-    document.querySelectorAll(".card").forEach((c,i)=>setTimeout(()=>c.classList.add("show"), i*150));
-  },2500);
-};
-
-/* Page Navigation */
-function openPage(id,title){
-  document.getElementById("menu").classList.remove("active");
-  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  document.getElementById("pagetitle").textContent = title;
-}
-
-function backMenu(){
-  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-  document.getElementById("menu").classList.add("active");
-  document.getElementById("pagetitle").textContent = "منوی بازی‌ها";
-}
-
-/* Fullscreen Toggle */
-function toggleFull(id){
-  let el=document.getElementById(id);
-  if(!document.fullscreenElement) el.requestFullscreen();
-  else document.exitFullscreen();
-}
-
-/* ⭐ باز کردن دوز در مرورگر خارجی (کاملاً طبق SDK ایتا) */
-function openDoz(){
-    EitaaWebApp.openLink(
-        "https://eitaa.com/store_app/app?startapp=app_126&btn=دوز",
-        { try_instant_view:false }
-    );
-}
-
+  promo.addEventListener('click', () => {
+    if (window.Eitaa && window.Eitaa.WebApp && typeof Eitaa.WebApp.openEitaaLink === 'function') {
+      Eitaa.WebApp.openEitaaLink('eitaa://resolve?domain=Arvin_webdev');
+      return;
+    }
+    try {
+      navigator.clipboard?.writeText('@Arvin_webdev');
+      alert('آیدی @Arvin_webdev کپی شد — لطفاً داخل ایتا پیست کنید.');
+    } catch(e) {
+      alert('لطفاً از داخل برنامه ایتا وارد شوید.');
+    }
+  });
+})();
 </script>
 
 </body>
-
 </html>
