@@ -35,7 +35,7 @@
       font-size: 1.6rem;
       margin-bottom: 15px;
       font-weight: bold;
-      color: #ffd84a; /* رنگ زرد برای دیده شدن */
+      color: #ffd84a;
       text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
     }
     .card {
@@ -87,8 +87,6 @@
       background: rgba(255,255,255,0.35);
       transform: scale(1.1);
     }
-
-    /* آیکون 2048 */
     .icon-2048 {
       width: 200px;
       height: 200px;
@@ -111,8 +109,6 @@
       transform: scale(1.03);
       transition: 0.3s ease-in-out;
     }
-
-    /* صفحه دوز */
     .board {
       display: grid;
       grid-template-columns: repeat(3, 60px);
@@ -143,7 +139,7 @@
       text-shadow: 2px 2px 5px #0b5f8a;
     }
   </style>
-  <script src="https://developer.eitaa.com/js/eitaa-sdk.js"></script>
+  <script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
 </head>
 <body>
   <canvas id="particles"></canvas>
@@ -153,7 +149,7 @@
   <div class="container">
     <h1 id="headerTitle">ARVIN GAMES</h1>
 
-    <div class="card" onclick="Eitaa.openLink('https://eitaa.com/store_app/app?startapp=app_207&btn=مرکز.برنامک.های.ایتا')">
+    <div class="card" onclick="Eitaa.WebApp.openEitaaLink('eitaa://store_app/app?startapp=app_207&btn=مرکز.برنامک.های.ایتا')">
       <div class="board">
         <div class="cell o">O</div>
         <div class="cell x">X</div>
@@ -168,12 +164,12 @@
       <div class="title">دوز</div>
     </div>
 
-    <div class="card" onclick="Eitaa.openLink('https://eitaa.com/store_app/app?startapp=app_126&btn=مرکز.برنامک.های.ایتا')">
+    <div class="card" onclick="Eitaa.WebApp.openEitaaLink('eitaa://store_app/app?startapp=app_126&btn=مرکز.برنامک.های.ایتا')">
       <img src="https://upload.wikimedia.org/wikipedia/en/0/0a/Flappy_Bird_icon.png" alt="پرنده فلپی">
       <div class="title">پرنده فلپی</div>
     </div>
 
-    <div class="card" onclick="Eitaa.openLink('https://eitaa.com/store_app/app?startapp=app_205&btn=مرکز.برنامک.های.ایتا')">
+    <div class="card" onclick="Eitaa.WebApp.openEitaaLink('eitaa://store_app/app?startapp=app_205&btn=مرکز.برنامک.های.ایتا')">
       <div class="icon-2048">2048</div>
       <div class="title">۲۰۴۸</div>
     </div>
@@ -217,7 +213,7 @@
         ctx.fill();
 
         p.x += p.dx;
-p.y += p.dy;
+        p.y += p.dy;
 
         if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
         if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
