@@ -33,10 +33,13 @@
     h1 {
       text-align: center;
       font-size: 1.6rem;
-      margin-bottom: 15px;
+      margin: 0 0 20px 0;
+      padding: 10px;
       font-weight: bold;
       color: #ffd84a;
       text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+      background: rgba(0,0,0,0.4);
+      border-radius: 8px;
     }
     .card {
       background: #2a2a3d;
@@ -144,12 +147,12 @@
 <body>
   <canvas id="particles"></canvas>
   <div class="toggle">
-    <button id="modeBtn">🌙</button>
+    <button id="modeBtn"></button>
   </div>
   <div class="container">
     <h1 id="headerTitle">ARVIN GAMES</h1>
 
-    <div class="card" onclick="Eitaa.WebApp.openEitaaLink('eitaa://store_app/app?startapp=app_207&btn=مرکز.برنامک.های.ایتا')">
+    <div class="card" onclick="Eitaa.WebApp.openEitaaLink('eitaa://store_app/app?startapp=app_207&btn=...')">
       <div class="board">
         <div class="cell o">O</div>
         <div class="cell x">X</div>
@@ -161,17 +164,17 @@
         <div class="cell x">X</div>
         <div class="cell x">X</div>
       </div>
-      <div class="title">دوز</div>
+      <div class="title"></div>
     </div>
 
-    <div class="card" onclick="Eitaa.WebApp.openEitaaLink('eitaa://store_app/app?startapp=app_126&btn=مرکز.برنامک.های.ایتا')">
-      <img src="https://upload.wikimedia.org/wikipedia/en/0/0a/Flappy_Bird_icon.png" alt="پرنده فلپی">
-      <div class="title">پرنده فلپی</div>
+    <div class="card" onclick="Eitaa.WebApp.openEitaaLink('eitaa://store_app/app?startapp=app_126&btn=...')">
+      <img src="https://upload.wikimedia.org/wikipedia/en/0/0a/Flappy_Bird_icon.png" alt=" ">
+      <div class="title"> </div>
     </div>
 
-    <div class="card" onclick="Eitaa.WebApp.openEitaaLink('eitaa://store_app/app?startapp=app_205&btn=مرکز.برنامک.های.ایتا')">
+    <div class="card" onclick="Eitaa.WebApp.openEitaaLink('eitaa://store_app/app?startapp=app_205&btn=...')">
       <div class="icon-2048">2048</div>
-      <div class="title">۲۰۴۸</div>
+      <div class="title"></div>
     </div>
   </div>
 
@@ -212,7 +215,7 @@
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fill();
 
-        p.x += p.dx;
+p.x += p.dx;
         p.y += p.dy;
 
         if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
@@ -236,7 +239,7 @@
         c.style.color = isNight ? '#fff' : '#000';
       });
       headerTitle.style.color = isNight ? '#ffd84a' : '#000';
-      modeBtn.textContent = isNight ? '☽' : '☼';
+      modeBtn.textContent = isNight ? '' : '';
       createParticles();
     });
   </script>
