@@ -4,174 +4,164 @@
   <meta charset="UTF-8">
   <title>ARVIN GAMES</title>
 
-  <!-- SDK رسمی ایتا -->
   <script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
 
   <style>
     body {
       margin: 0;
       font-family: sans-serif;
+      background: #0b0f1a;
       color: #fff;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      overflow: hidden;
-      background: #0b0f1a;
     }
-    canvas {
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-    }
+
     .container {
       width: 340px;
-      background: rgba(0,0,0,0.55);
+      max-height: 90vh;
+      overflow-y: auto;
+      background: rgba(0,0,0,0.6);
+      padding: 16px;
       border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
     }
+
     h1 {
       text-align: center;
-      font-size: 1.6rem;
-      margin-bottom: 20px;
       color: #ffd84a;
+      margin-bottom: 16px;
     }
+
     .card {
       background: #2a2a3d;
-      margin-bottom: 14px;
       border-radius: 8px;
-      padding: 12px;
+      margin-bottom: 14px;
       cursor: pointer;
-      text-align: center;
-      transition: transform 0.2s;
+      transition: transform .2s;
+      overflow: hidden;
     }
-    .card:hover {
-      transform: translateY(-3px);
-    }
-    .title {
-      margin-top: 10px;
-      font-size: 1.1rem;
-    }
-    .board {
-      display: grid;
-      grid-template-columns: repeat(3, 60px);
-      grid-template-rows: repeat(3, 60px);
-      gap: 6px;
-      justify-content: center;
-      margin: 0 auto;
-    }
-    .cell {
-      background: #e2b574;
-      border-radius: 10px;
+
+    .card:hover { transform: translateY(-3px); }
+
+    /* باکس تصویر */
+    .preview {
+      max-height: 150px;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 32px;
+      overflow: hidden;
+      padding: 10px;
+    }
+
+    .title {
+      background: rgba(0,0,0,0.35);
+      padding: 10px;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+
+    /* دوز */
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 45px);
+      grid-template-rows: repeat(3, 45px);
+      gap: 5px;
+    }
+
+    .cell {
+      background: #e2b574;
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
       font-weight: bold;
     }
+
     .cell.x { color: #e63737; }
     .cell.o { color: #1da3dd; }
 
+    /* 2048 */
     .icon-2048 {
-      width: 160px;
-      height: 160px;
-      border-radius: 25%;
+      width: 120px;
+      height: 120px;
+      border-radius: 22%;
       background: linear-gradient(145deg, #ffe259, #f6aa2c);
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 52px;
+      font-size: 40px;
       font-weight: bold;
-      margin: 0 auto;
+      color: white;
+    }
+
+    img {
+      max-width: 120px;
     }
   </style>
 </head>
 
 <body>
-<canvas id="particles"></canvas>
-
 <div class="container">
   <h1>ARVIN GAMES</h1>
 
-  <div class="card" data-link="eitaa://store_app/app?startapp=app_207">
-    <div class="board">
-      <div class="cell o">O</div><div class="cell x">X</div><div class="cell x">X</div>
-      <div class="cell x">X</div><div class="cell o">O</div><div class="cell o">O</div>
-      <div class="cell o">O</div><div class="cell x">X</div><div class="cell x">X</div>
+  <!-- دوز -->
+  <div class="card" data-app="app_207">
+    <div class="preview">
+      <div class="board">
+        <div class="cell o">O</div>
+        <div class="cell x">X</div>
+        <div class="cell x">X</div>
+        <div class="cell x">X</div>
+        <div class="cell o">O</div>
+        <div class="cell o">O</div>
+        <div class="cell o">O</div>
+        <div class="cell x">X</div>
+        <div class="cell x">X</div>
+      </div>
     </div>
     <div class="title">دوز</div>
   </div>
 
-  <div class="card" data-link="eitaa://store_app/app?startapp=app_126">
-    <img src="https://upload.wikimedia.org/wikipedia/en/0/0a/Flappy_Bird_icon.png" width="120">
+  <!-- فلپی -->
+  <div class="card" data-app="app_126">
+    <div class="preview">
+      <img src="https://upload.wikimedia.org/wikipedia/en/0/0a/Flappy_Bird_icon.png">
+    </div>
     <div class="title">پرنده فلپی</div>
   </div>
 
-  <div class="card" data-link="eitaa://store_app/app?startapp=app_205">
-    <div class="icon-2048">2048</div>
+  <!-- 2048 -->
+  <div class="card" data-app="app_205">
+    <div class="preview">
+      <div class="icon-2048">2048</div>
+    </div>
     <div class="title">۲۰۴۸</div>
   </div>
 </div>
 
 <script>
-  // آماده‌سازی SDK ایتا
   if (window.Eitaa && Eitaa.WebApp && typeof Eitaa.WebApp.ready === 'function') {
     Eitaa.WebApp.ready();
   }
 
-  // کلیک کارت‌ها (روش صحیح باز کردن لینک داخلی ایتا)
+  function isInsideEitaa() {
+    return !!(window.Eitaa && Eitaa.WebApp);
+  }
+
   document.querySelectorAll('.card').forEach(card => {
     card.addEventListener('click', () => {
-      const link = card.dataset.link;
-      if (link) {
-        window.location.href = link;
-      }
+      const appId = card.dataset.app;
+      if (!appId) return;
+
+      const url = isInsideEitaa()
+        ? `https://eitaa.com/store_app/app?startapp=${appId}`
+        : `eitaa://store_app/app?startapp=${appId}`;
+
+      window.location.href = url;
     });
   });
-
-  // ذرات پس‌زمینه
-  const canvas = document.getElementById('particles');
-  const ctx = canvas.getContext('2d');
-  let particles = [];
-
-  function resize() {
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
-  }
-
-  function createParticles() {
-    particles = [];
-    for (let i = 0; i < 60; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        r: Math.random() * 2 + 1,
-        dx: (Math.random() - 0.5),
-        dy: (Math.random() - 0.5)
-      });
-    }
-  }
-
-  function animate() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle = 'rgba(255,255,255,0.8)';
-    particles.forEach(p => {
-      ctx.beginPath();
-      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fill();
-      p.x += p.dx;
-      p.y += p.dy;
-      if (p.x<0||p.x>canvas.width) p.dx*=-1;
-      if (p.y<0||p.y>canvas.height) p.dy*=-1;
-    });
-    requestAnimationFrame(animate);
-  }
-
-  resize();
-  createParticles();
-  animate();
-  addEventListener('resize', resize);
 </script>
 </body>
 </html>
