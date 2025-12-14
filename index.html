@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>ARVIN GAMES</title>
+
+  <!-- SDK رسمی ایتا باید قبل از هر اسکریپت دیگری لود شود -->
+  <script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
+
   <style>
     body {
       margin: 0;
@@ -142,17 +146,19 @@
       text-shadow: 2px 2px 5px #0b5f8a;
     }
   </style>
-  <script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
 </head>
 <body>
   <canvas id="particles"></canvas>
+
   <div class="toggle">
-    <button id="modeBtn"></button>
+    <button id="modeBtn">🌙</button>
   </div>
+
   <div class="container">
     <h1 id="headerTitle">ARVIN GAMES</h1>
 
-    <div class="card" onclick="Eitaa.WebApp.openEitaaLink('eitaa://store_app/app?startapp=app_207&btn=...')">
+    <!-- کارت‌ها: از data-link برای لینک‌های ایتایی استفاده می‌کنیم -->
+    <div class="card" data-link="eitaa://store_app/app?startapp=app_207&btn=مرکز.برنامک.های.ایتا">
       <div class="board">
         <div class="cell o">O</div>
         <div class="cell x">X</div>
@@ -164,21 +170,22 @@
         <div class="cell x">X</div>
         <div class="cell x">X</div>
       </div>
-      <div class="title"></div>
+      <div class="title">دوز</div>
     </div>
 
-    <div class="card" onclick="Eitaa.WebApp.openEitaaLink('eitaa://store_app/app?startapp=app_126&btn=...')">
-      <img src="https://upload.wikimedia.org/wikipedia/en/0/0a/Flappy_Bird_icon.png" alt=" ">
-      <div class="title"> </div>
+    <div class="card" data-link="eitaa://store_app/app?startapp=app_126&btn=مرکز.برنامک.های.ایتا">
+      <img src="https://upload.wikimedia.org/wikipedia/en/0/0a/Flappy_Bird_icon.png" alt="پرنده فلپی">
+      <div class="title">پرنده فلپی</div>
     </div>
 
-    <div class="card" onclick="Eitaa.WebApp.openEitaaLink('eitaa://store_app/app?startapp=app_205&btn=...')">
+    <div class="card" data-link="eitaa://store_app/app?startapp=app_205&btn=مرکز.برنامک.های.ایتا">
       <div class="icon-2048">2048</div>
-      <div class="title"></div>
+      <div class="title">۲۰۴۸</div>
     </div>
   </div>
 
   <script>
+    // انیمیشن ذرات
     const canvas = document.getElementById('particles');
     const ctx = canvas.getContext('2d');
     let particles = [];
@@ -215,7 +222,7 @@
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fill();
 
-p.x += p.dx;
+        p.x += p.dx;
         p.y += p.dy;
 
         if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
@@ -224,23 +231,51 @@ p.x += p.dx;
       requestAnimationFrame(draw);
     }
 
-    resize();
-    createParticles();
-    draw();
+    // وقتی صفحه آماده شد، SDK را Ready کن و رویداد کلیک‌ها را ثبت کن
+    window.addEventListener('DOMContentLoaded', () => {
+      try {
+        // آماده‌سازی برنامک داخل ایتا (اگر SDK در دسترس است)
+        if (window.Eitaa && Eitaa.WebApp && typeof Eitaa.WebApp.ready === 'function') {
+          Eitaa.WebApp.ready();
+        }
 
-    const modeBtn = document.getElementById('modeBtn');
-    const headerTitle = document.getElementById('headerTitle');
-    modeBtn.addEventListener('click', () => {
-      isNight = !isNight;
-      document.body.style.background = isNight ? '#0b0f1a' : '#e6f2ff';
-      document.querySelector('.container').style.background = isNight ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.7)';
-      document.querySelectorAll('.card').forEach(c => {
-        c.style.background = isNight ? '#2a2a3d' : '#f0f0f0';
-        c.style.color = isNight ? '#fff' : '#000';
-      });
-      headerTitle.style.color = isNight ? '#ffd84a' : '#000';
-      modeBtn.textContent = isNight ? '' : '';
+        // ثبت کلیک کارت‌ها با محافظ خطا
+        document.querySelectorAll('.card').forEach(card => {
+          card.addEventListener('click', () => {
+            const link = card.getAttribute('data-link');
+            if (window.Eitaa && Eitaa.WebApp && typeof Eitaa.WebApp.openEitaaLink === 'function') {
+              Eitaa.WebApp.openEitaaLink(link);
+            } else {
+              // خارج از محیط ایتا یا SDK در دسترس نیست؛ از خطا جلوگیری می‌کنیم
+              console.warn('Eitaa.WebApp در دسترس نیست. این کد باید داخل اپ ایتا اجرا شود.');
+              alert('این لینک فقط داخل اپلیکیشن ایتا باز می‌شود.');
+            }
+          });
+        });
+
+        // دکمه تغییر حالت
+        const modeBtn = document.getElementById('modeBtn');
+        const headerTitle = document.getElementById('headerTitle');
+        modeBtn.addEventListener('click', () => {
+          isNight = !isNight;
+          document.body.style.background = isNight ? '#0b0f1a' : '#e6f2ff';
+          document.querySelector('.container').style.background = isNight ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.7)';
+          document.querySelectorAll('.card').forEach(c => {
+            c.style.background = isNight ? '#2a2a3d' : '#f0f0f0';
+            c.style.color = isNight ? '#fff' : '#000';
+          });
+          headerTitle.style.color = isNight ? '#ffd84a' : '#000';
+          modeBtn.textContent = isNight ? '🌙' : '☀️';
+          createParticles();
+        });
+      } catch (e) {
+        console.error('خطای اسکریپت:', e);
+      }
+
+      // شروع انیمیشن
+      resize();
       createParticles();
+      draw();
     });
   </script>
 </body>
