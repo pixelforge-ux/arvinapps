@@ -1,167 +1,309 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>ARVIN GAMES</title>
+<meta charset="UTF-8">
+<title>ARVIN GAMES</title>
+<script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
 
-  <script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
+<style>
+*{box-sizing:border-box}
 
-  <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background: #0b0f1a;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+body{
+  margin:0;
+  font-family:sans-serif;
+  background:#0b0f1a;
+  color:#fff;
+  overflow:hidden;
+}
 
-    .container {
-      width: 340px;
-      max-height: 90vh;
-      overflow-y: auto;
-      background: rgba(0,0,0,0.6);
-      padding: 16px;
-      border-radius: 10px;
-    }
+/* پس‌زمینه متحرک */
+canvas{
+  position:fixed;
+  inset:0;
+  z-index:-1;
+}
 
-    h1 {
-      text-align: center;
-      color: #ffd84a;
-      margin-bottom: 16px;
-    }
+/* عنوان اصلی */
+.main-title{
+  position:fixed;
+  top:14px;
+  right:0;
+  left:0;
+  text-align:center;
+  font-size:1.5rem;
+  font-weight:bold;
+  color:#ffd84a;
+  z-index:9;
+  pointer-events:none;
+  text-shadow:0 4px 12px rgba(0,0,0,.6);
+}
 
-    .card {
-      background: #2a2a3d;
-      border-radius: 8px;
-      margin-bottom: 14px;
-      cursor: pointer;
-      transition: transform .2s;
-      overflow: hidden;
-    }
+/* دکمه شب/روز */
+.toggle{
+  position:fixed;
+  top:14px;
+  left:14px;
+  z-index:10;
+}
+.toggle button{
+  width:44px;
+  height:44px;
+  border:none;
+  border-radius:50%;
+  font-size:20px;
+  background:rgba(255,255,255,.25);
+  color:#fff;
+  cursor:pointer;
+}
 
-    .card:hover { transform: translateY(-3px); }
+/* لیست */
+.menu{
+  padding:80px 16px 16px;
+  height:100vh;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.menu::-webkit-scrollbar{width:0}
 
-    /* باکس تصویر */
-    .preview {
-      max-height: 150px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-      padding: 10px;
-    }
+/* کارت */
+.card{
+  background:#2a2a3d;
+  border-radius:14px;
+  padding:12px;
+  margin-bottom:16px;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+  text-align:center;
 
-    .title {
-      background: rgba(0,0,0,0.35);
-      padding: 10px;
-      font-size: 1.1rem;
-      text-align: center;
-    }
+  transform:translateY(20px) scale(.95);
+  opacity:0;
+  animation:cardIn .6s ease forwards;
+}
+.card:nth-child(1){animation-delay:.05s}
+.card:nth-child(2){animation-delay:.12s}
+.card:nth-child(3){animation-delay:.18s}
 
-    /* دوز */
-    .board {
-      display: grid;
-      grid-template-columns: repeat(3, 45px);
-      grid-template-rows: repeat(3, 45px);
-      gap: 5px;
-    }
+@keyframes cardIn{
+  to{transform:none;opacity:1}
+}
 
-    .cell {
-      background: #e2b574;
-      border-radius: 8px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 24px;
-      font-weight: bold;
-    }
+.card:hover{
+  transform:translateY(-6px) scale(1.02);
+  box-shadow:0 14px 30px rgba(0,0,0,.45);
+}
+.card:active{transform:scale(.97)}
 
-    .cell.x { color: #e63737; }
-    .cell.o { color: #1da3dd; }
+.card img{
+  width:100%;
+  height:140px;
+  object-fit:cover;
+  border-radius:10px;
+}
 
-    /* 2048 */
-    .icon-2048 {
-      width: 120px;
-      height: 120px;
-      border-radius: 22%;
-      background: linear-gradient(145deg, #ffe259, #f6aa2c);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 40px;
-      font-weight: bold;
-      color: white;
-    }
+.title{
+  margin-top:10px;
+  font-size:1.1rem;
+  font-weight:bold;
+}
 
-    img {
-      max-width: 120px;
-    }
-  </style>
+/* دوز */
+.board{
+  display:grid;
+  grid-template-columns:repeat(3,44px);
+  grid-template-rows:repeat(3,44px);
+  gap:6px;
+  justify-content:center;
+  margin:auto;
+}
+.cell{
+  width:44px;
+  height:44px;
+  border-radius:10px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:26px;
+  font-weight:bold;
+  background:#e2b574;
+}
+.x{color:#e63737}
+.o{color:#1da3dd}
+
+/* viewer */
+.viewer{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#000;
+  z-index:999;
+  flex-direction:column;
+}
+.viewer header{
+  background:#1e1e2f;
+  padding:10px;
+  text-align:center;
+  position:relative;
+}
+.viewer button{
+  position:absolute;
+  right:10px;
+  top:8px;
+  background:none;
+  border:none;
+  color:#fff;
+  font-size:18px;
+  cursor:pointer;
+}
+iframe{
+  flex:1;
+  border:none;
+  width:100%;
+}
+
+/* لودینگ */
+.loader{
+  position:absolute;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:#000;
+}
+.spinner{
+  width:60px;
+  height:60px;
+  border:6px solid #555;
+  border-top-color:#ffd84a;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ripple */
+.ripple{
+  position:absolute;
+  width:20px;
+  height:20px;
+  background:rgba(255,255,255,.3);
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  animation:ripple .6s ease-out;
+}
+@keyframes ripple{
+  to{width:300px;height:300px;opacity:0}
+}
+</style>
 </head>
 
 <body>
-<div class="container">
-  <h1>ARVIN GAMES</h1>
 
-  <!-- دوز -->
-  <div class="card" data-app="app_207">
-    <div class="preview">
-      <div class="board">
-        <div class="cell o">O</div>
-        <div class="cell x">X</div>
-        <div class="cell x">X</div>
-        <div class="cell x">X</div>
-        <div class="cell o">O</div>
-        <div class="cell o">O</div>
-        <div class="cell o">O</div>
-        <div class="cell x">X</div>
-        <div class="cell x">X</div>
-      </div>
+<canvas id="bg"></canvas>
+<h1 class="main-title">ARVIN GAMES</h1>
+
+<div class="toggle">
+  <button id="modeBtn">🌙</button>
+</div>
+
+<div class="menu" id="menu">
+
+  <div class="card" data-url="https://pixelforge-ux.github.io/Game/">
+    <div class="board">
+      <div class="cell o">O</div><div class="cell x">X</div><div class="cell x">X</div>
+      <div class="cell x">X</div><div class="cell o">O</div><div class="cell o">O</div>
+      <div class="cell o">O</div><div class="cell x">X</div><div class="cell x">X</div>
     </div>
     <div class="title">دوز</div>
   </div>
 
-  <!-- فلپی -->
-  <div class="card" data-app="app_126">
-    <div class="preview">
-      <img src="https://upload.wikimedia.org/wikipedia/en/0/0a/Flappy_Bird_icon.png">
-    </div>
+  <div class="card" data-url="https://pixelforge-ux.github.io/Fllapybird/">
+    <img src="https://upload.wikimedia.org/wikipedia/en/0/0a/Flappy_Bird_icon.png">
     <div class="title">پرنده فلپی</div>
   </div>
 
-  <!-- 2048 -->
-  <div class="card" data-app="app_205">
-    <div class="preview">
-      <div class="icon-2048">2048</div>
-    </div>
+  <div class="card" data-url="https://pixelforge-ux.github.io/2048/">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/1/18/2048_logo.svg">
     <div class="title">۲۰۴۸</div>
   </div>
+
+</div>
+
+<div class="viewer" id="viewer">
+  <header>
+    <button id="back">⬅</button>
+    <span id="pageTitle"></span>
+  </header>
+  <div class="loader" id="loader"><div class="spinner"></div></div>
+  <iframe id="frame"></iframe>
 </div>
 
 <script>
-  if (window.Eitaa && Eitaa.WebApp && typeof Eitaa.WebApp.ready === 'function') {
-    Eitaa.WebApp.ready();
-  }
+if(window.Eitaa && Eitaa.WebApp){Eitaa.WebApp.ready();}
 
-  function isInsideEitaa() {
-    return !!(window.Eitaa && Eitaa.WebApp);
-  }
+/* پس‌زمینه */
+const c=document.getElementById('bg'),ctx=c.getContext('2d');
+let p=[],night=true;
+function resize(){c.width=innerWidth;c.height=innerHeight}
+function gen(){
+ p=[];
+ for(let i=0;i<80;i++)
+  p.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*2+1,dx:(Math.random()-.5),dy:(Math.random()-.5)});
+}
+function draw(){
+ ctx.clearRect(0,0,c.width,c.height);
+ p.forEach(o=>{
+  ctx.fillStyle=night?'#fff':'#ffd84a';
+  ctx.beginPath();ctx.arc(o.x,o.y,o.r,0,Math.PI*2);ctx.fill();
+  o.x+=o.dx;o.y+=o.dy;
+  if(o.x<0||o.x>c.width)o.dx*=-1;
+  if(o.y<0||o.y>c.height)o.dy*=-1;
+ });
+ requestAnimationFrame(draw);
+}
+resize();gen();draw();
+onresize=()=>{resize();gen();}
 
-  document.querySelectorAll('.card').forEach(card => {
-    card.addEventListener('click', () => {
-      const appId = card.dataset.app;
-      if (!appId) return;
+/* کارت‌ها */
+const viewer=document.getElementById('viewer');
+const frame=document.getElementById('frame');
+const loader=document.getElementById('loader');
+const menu=document.getElementById('menu');
+const titleEl=document.getElementById('pageTitle');
 
-      const url = isInsideEitaa()
-        ? `https://eitaa.com/store_app/app?startapp=${appId}`
-        : `eitaa://store_app/app?startapp=${appId}`;
+document.querySelectorAll('.card').forEach(card=>{
+ card.onclick=e=>{
+  const r=document.createElement('span');
+  r.className='ripple';
+  r.style.left=e.offsetX+'px';
+  r.style.top=e.offsetY+'px';
+  card.appendChild(r);
+  setTimeout(()=>r.remove(),600);
 
-      window.location.href = url;
-    });
-  });
+  frame.src=card.dataset.url;
+  titleEl.textContent=card.querySelector('.title').textContent;
+  loader.style.display='flex';
+  viewer.style.display='flex';
+  menu.style.display='none';
+ };
+});
+
+frame.onload=()=>loader.style.display='none';
+document.getElementById('back').onclick=()=>{
+ frame.src='';
+ viewer.style.display='none';
+ menu.style.display='block';
+};
+
+/* شب / روز */
+document.getElementById('modeBtn').onclick=()=>{
+ night=!night;
+ document.body.style.background=night?'#0b0f1a':'#eaf3ff';
+ document.querySelector('.main-title').style.color=night?'#ffd84a':'#222';
+ document.getElementById('modeBtn').textContent=night?'🌙':'☀️';
+ gen();
+};
 </script>
+
 </body>
 </html>
