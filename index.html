@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>ARVIN GAMES</title>
 
-  <!-- SDK رسمی ایتا باید قبل از هر اسکریپت دیگری لود شود -->
+  <!-- SDK رسمی ایتا -->
   <script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
 
   <style>
@@ -17,13 +17,11 @@
       align-items: center;
       height: 100vh;
       overflow: hidden;
-      transition: background 0.5s ease, color 0.5s ease;
       background: #0b0f1a;
     }
     canvas {
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      inset: 0;
       z-index: -1;
     }
     .container {
@@ -32,99 +30,35 @@
       border-radius: 10px;
       padding: 20px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-      transition: background 0.5s ease, color 0.5s ease;
     }
     h1 {
       text-align: center;
       font-size: 1.6rem;
-      margin: 0 0 20px 0;
-      padding: 10px;
-      font-weight: bold;
+      margin-bottom: 20px;
       color: #ffd84a;
-      text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
-      background: rgba(0,0,0,0.4);
-      border-radius: 8px;
     }
     .card {
       background: #2a2a3d;
       margin-bottom: 14px;
       border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-      transition: transform 0.2s ease, background 0.5s ease, color 0.5s ease;
+      padding: 12px;
       cursor: pointer;
       text-align: center;
-      padding: 10px;
+      transition: transform 0.2s;
     }
     .card:hover {
       transform: translateY(-3px);
     }
-    .card img {
-      width: 100%;
-      height: 140px;
-      object-fit: cover;
-      display: block;
-    }
-    .card .title {
-      padding: 12px;
-      text-align: center;
+    .title {
+      margin-top: 10px;
       font-size: 1.1rem;
-      color: #fff;
-    }
-    .toggle {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      z-index: 10;
-    }
-    .toggle button {
-      width: 48px;
-      height: 48px;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 1.4rem;
-      background: rgba(255,255,255,0.2);
-      backdrop-filter: blur(6px);
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-      transition: background 0.3s ease, transform 0.2s ease;
-    }
-    .toggle button:hover {
-      background: rgba(255,255,255,0.35);
-      transform: scale(1.1);
-    }
-    .icon-2048 {
-      width: 200px;
-      height: 200px;
-      border-radius: 25%;
-      background: linear-gradient(145deg, #ffe259, #f6aa2c);
-      box-shadow: inset 4px 4px 12px rgba(255, 255, 255, 0.4),
-                  10px 10px 25px rgba(0,0,0,0.2);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 64px;
-      font-weight: 700;
-      font-family: Arial, Helvetica, sans-serif;
-      color: white;
-      text-shadow: 0 3px 6px rgba(0,0,0,0.15);
-      margin: 0 auto;
-    }
-    .icon-2048:hover {
-      background: linear-gradient(145deg, #ffd84a, #f8b422);
-      transform: scale(1.03);
-      transition: 0.3s ease-in-out;
     }
     .board {
       display: grid;
       grid-template-columns: repeat(3, 60px);
       grid-template-rows: repeat(3, 60px);
       gap: 6px;
-      background: #c79a5d;
-      padding: 6px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #6a4b2c;
+      justify-content: center;
       margin: 0 auto;
     }
     .cell {
@@ -135,148 +69,109 @@
       align-items: center;
       font-size: 32px;
       font-weight: bold;
-      box-shadow: inset 0 3px 6px rgba(0,0,0,0.3);
     }
-    .cell.x {
-      color: #e63737;
-      text-shadow: 2px 2px 5px #742020;
-    }
-    .cell.o {
-      color: #1da3dd;
-      text-shadow: 2px 2px 5px #0b5f8a;
+    .cell.x { color: #e63737; }
+    .cell.o { color: #1da3dd; }
+
+    .icon-2048 {
+      width: 160px;
+      height: 160px;
+      border-radius: 25%;
+      background: linear-gradient(145deg, #ffe259, #f6aa2c);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 52px;
+      font-weight: bold;
+      margin: 0 auto;
     }
   </style>
 </head>
+
 <body>
-  <canvas id="particles"></canvas>
+<canvas id="particles"></canvas>
 
-  <div class="toggle">
-    <button id="modeBtn">🌙</button>
+<div class="container">
+  <h1>ARVIN GAMES</h1>
+
+  <div class="card" data-link="eitaa://store_app/app?startapp=app_207">
+    <div class="board">
+      <div class="cell o">O</div><div class="cell x">X</div><div class="cell x">X</div>
+      <div class="cell x">X</div><div class="cell o">O</div><div class="cell o">O</div>
+      <div class="cell o">O</div><div class="cell x">X</div><div class="cell x">X</div>
+    </div>
+    <div class="title">دوز</div>
   </div>
 
-  <div class="container">
-    <h1 id="headerTitle">ARVIN GAMES</h1>
-
-    <!-- کارت‌ها: از data-link برای لینک‌های ایتایی استفاده می‌کنیم -->
-    <div class="card" data-link="eitaa://store_app/app?startapp=app_207&btn=مرکز.برنامک.های.ایتا">
-      <div class="board">
-        <div class="cell o">O</div>
-        <div class="cell x">X</div>
-        <div class="cell x">X</div>
-        <div class="cell x">X</div>
-        <div class="cell o">O</div>
-        <div class="cell o">O</div>
-        <div class="cell o">O</div>
-        <div class="cell x">X</div>
-        <div class="cell x">X</div>
-      </div>
-      <div class="title">دوز</div>
-    </div>
-
-    <div class="card" data-link="eitaa://store_app/app?startapp=app_126&btn=مرکز.برنامک.های.ایتا">
-      <img src="https://upload.wikimedia.org/wikipedia/en/0/0a/Flappy_Bird_icon.png" alt="پرنده فلپی">
-      <div class="title">پرنده فلپی</div>
-    </div>
-
-    <div class="card" data-link="eitaa://store_app/app?startapp=app_205&btn=مرکز.برنامک.های.ایتا">
-      <div class="icon-2048">2048</div>
-      <div class="title">۲۰۴۸</div>
-    </div>
+  <div class="card" data-link="eitaa://store_app/app?startapp=app_126">
+    <img src="https://upload.wikimedia.org/wikipedia/en/0/0a/Flappy_Bird_icon.png" width="120">
+    <div class="title">پرنده فلپی</div>
   </div>
 
-  <script>
-    // انیمیشن ذرات
-    const canvas = document.getElementById('particles');
-    const ctx = canvas.getContext('2d');
-    let particles = [];
-    let isNight = true;
+  <div class="card" data-link="eitaa://store_app/app?startapp=app_205">
+    <div class="icon-2048">2048</div>
+    <div class="title">۲۰۴۸</div>
+  </div>
+</div>
 
-    function resize() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', () => {
-      resize();
-      createParticles();
-    });
+<script>
+  // آماده‌سازی SDK ایتا
+  if (window.Eitaa && Eitaa.WebApp && typeof Eitaa.WebApp.ready === 'function') {
+    Eitaa.WebApp.ready();
+  }
 
-    function createParticles() {
-      particles = [];
-      for (let i = 0; i < 80; i++) {
-        particles.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          r: Math.random() * 3 + 1,
-          dx: (Math.random() - 0.5) * 1.2,
-          dy: (Math.random() - 0.5) * 1.2,
-          color: isNight ? 'rgba(255,255,255,0.8)' : 'rgba(255,215,0,0.8)'
-        });
+  // کلیک کارت‌ها (روش صحیح باز کردن لینک داخلی ایتا)
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', () => {
+      const link = card.dataset.link;
+      if (link) {
+        window.location.href = link;
       }
-    }
+    });
+  });
 
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach(p => {
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fill();
+  // ذرات پس‌زمینه
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
 
-        p.x += p.dx;
-        p.y += p.dy;
+  function resize() {
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+  }
 
-        if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+  function createParticles() {
+    particles = [];
+    for (let i = 0; i < 60; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 2 + 1,
+        dx: (Math.random() - 0.5),
+        dy: (Math.random() - 0.5)
       });
-      requestAnimationFrame(draw);
     }
+  }
 
-    // وقتی صفحه آماده شد، SDK را Ready کن و رویداد کلیک‌ها را ثبت کن
-    window.addEventListener('DOMContentLoaded', () => {
-      try {
-        // آماده‌سازی برنامک داخل ایتا (اگر SDK در دسترس است)
-        if (window.Eitaa && Eitaa.WebApp && typeof Eitaa.WebApp.ready === 'function') {
-          Eitaa.WebApp.ready();
-        }
-
-        // ثبت کلیک کارت‌ها با محافظ خطا
-        document.querySelectorAll('.card').forEach(card => {
-          card.addEventListener('click', () => {
-            const link = card.getAttribute('data-link');
-            if (window.Eitaa && Eitaa.WebApp && typeof Eitaa.WebApp.openEitaaLink === 'function') {
-              Eitaa.WebApp.openEitaaLink(link);
-            } else {
-              // خارج از محیط ایتا یا SDK در دسترس نیست؛ از خطا جلوگیری می‌کنیم
-              console.warn('Eitaa.WebApp در دسترس نیست. این کد باید داخل اپ ایتا اجرا شود.');
-              alert('این لینک فقط داخل اپلیکیشن ایتا باز می‌شود.');
-            }
-          });
-        });
-
-        // دکمه تغییر حالت
-        const modeBtn = document.getElementById('modeBtn');
-        const headerTitle = document.getElementById('headerTitle');
-        modeBtn.addEventListener('click', () => {
-          isNight = !isNight;
-          document.body.style.background = isNight ? '#0b0f1a' : '#e6f2ff';
-          document.querySelector('.container').style.background = isNight ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.7)';
-          document.querySelectorAll('.card').forEach(c => {
-            c.style.background = isNight ? '#2a2a3d' : '#f0f0f0';
-            c.style.color = isNight ? '#fff' : '#000';
-          });
-          headerTitle.style.color = isNight ? '#ffd84a' : '#000';
-          modeBtn.textContent = isNight ? '🌙' : '☀️';
-          createParticles();
-        });
-      } catch (e) {
-        console.error('خطای اسکریپت:', e);
-      }
-
-      // شروع انیمیشن
-      resize();
-      createParticles();
-      draw();
+  function animate() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    particles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fill();
+      p.x += p.dx;
+      p.y += p.dy;
+      if (p.x<0||p.x>canvas.width) p.dx*=-1;
+      if (p.y<0||p.y>canvas.height) p.dy*=-1;
     });
-  </script>
+    requestAnimationFrame(animate);
+  }
+
+  resize();
+  createParticles();
+  animate();
+  addEventListener('resize', resize);
+</script>
 </body>
 </html>
