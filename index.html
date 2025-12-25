@@ -4,43 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     	 <script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
-    <script>
-document.addEventListener("DOMContentLoaded", () => {
+<script src="https://developer.eitaa.com/js/eitaa-web-app.js"></script>
+<script>
+    const webApp = Eitaa.WebApp;
 
-  if (!window.Eitaa || !Eitaa.WebApp) {
-    console.warn("Eitaa WebApp SDK not available");
-    return;
-  }
+    // آماده‌سازی WebApp
+    webApp.ready();
 
-  const app = Eitaa.WebApp;
+    // تمام صفحه شدن
+    webApp.expand();
 
-  /* آماده‌سازی */
-  app.ready();
+    // تغییر رنگ هدر (آبی مایل به سفید)
+    webApp.setHeaderColor('#e3f2fd'); // آبی خیلی روشن
+    // یا اگر کمی پررنگ‌تر می‌خوای:
+    // webApp.setHeaderColor('#bbdefb');
 
-  /* فول‌اسکرین واقعی (بعد از تعامل کاربر) */
-  document.addEventListener("click", () => {
-    app.requestFullscreen?.();
-  }, { once: true });
+    // نمایش دکمه بک
+    webApp.BackButton.show();
 
-  /* بستن سوایپ عمودی */
-  app.disableVerticalSwipes?.();
-
-  /* رنگ هدر */
-  app.setHeaderColor("#E3F2FD");
-
-  /* دکمه برگشت ایتا */
-  app.BackButton.show();
-
-  Eitaa.WebApp.onEvent('backButtonClicked', () => {
-        if (history.length > 1) history.back();
-        else Eitaa.WebApp.close();
+    // هندل کلیک دکمه بک
+    webApp.onEvent('backButtonClicked', () => {
+        if (history.length > 1) {
+            history.back();
+        } else {
+            webApp.close();
         }
-      }
-    );
-  });
-
-});
-    </script>
+    });
+</script>
     <title>سودوکو</title>
     <style>
         :root {
