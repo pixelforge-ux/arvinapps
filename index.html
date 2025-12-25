@@ -6,30 +6,28 @@
     	 <script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
 <script src="https://developer.eitaa.com/js/eitaa-web-app.js"></script>
 <script>
-    const webApp = Eitaa.WebApp;
+document.addEventListener("DOMContentLoaded", () => {
+  try {
+    if (window.Eitaa && Eitaa.WebApp) {
+      Eitaa.WebApp.ready();
 
-    // آماده‌سازی WebApp
-    webApp.ready();
+      // تمام صفحه شدن
+      if (Eitaa.WebApp.expand) Eitaa.WebApp.expand();
 
-    // تمام صفحه شدن
-    webApp.expand();
+      // تغییر رنگ هدر به آبی مایل به سفید
+      if (Eitaa.WebApp.setHeaderColor)
+        Eitaa.WebApp.setHeaderColor('#e3f2fd');
 
-    // تغییر رنگ هدر (آبی مایل به سفید)
-    webApp.setHeaderColor('#e3f2fd'); // آبی خیلی روشن
-    // یا اگر کمی پررنگ‌تر می‌خوای:
-    // webApp.setHeaderColor('#bbdefb');
+      if (Eitaa.WebApp.disableVerticalSwipes)
+        Eitaa.WebApp.disableVerticalSwipes();
 
-    // نمایش دکمه بک
-    webApp.BackButton.show();
-
-    // هندل کلیک دکمه بک
-    webApp.onEvent('backButtonClicked', () => {
-        if (history.length > 1) {
-            history.back();
-        } else {
-            webApp.close();
-        }
-    });
+      Eitaa.WebApp.onEvent('backButtonClicked', () => {
+        if (history.length > 1) history.back();
+        else Eitaa.WebApp.close();
+      });
+    }
+  } catch(e) { console.warn(e); }
+});
 </script>
     <title>سودوکو</title>
     <style>
