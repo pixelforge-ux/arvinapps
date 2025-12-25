@@ -31,13 +31,9 @@ document.addEventListener("DOMContentLoaded", () => {
   /* دکمه برگشت ایتا */
   app.BackButton.show();
 
-  app.BackButton.onClick(() => {
-    app.showConfirm(
-      "خروج",
-      "آیا مطمئن هستید که می‌خواهید خارج شوید؟",
-      (ok) => {
-        if (ok) {
-          app.close();
+  Eitaa.WebApp.onEvent('backButtonClicked', () => {
+        if (history.length > 1) history.back();
+        else Eitaa.WebApp.close();
         }
       }
     );
