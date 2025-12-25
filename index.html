@@ -10,16 +10,22 @@ document.addEventListener("DOMContentLoaded", () => {
   try {
     if (window.Eitaa && Eitaa.WebApp) {
       Eitaa.WebApp.ready();
-
-      // تمام صفحه شدن
       if (Eitaa.WebApp.expand) Eitaa.WebApp.expand();
+      if (Eitaa.WebApp.disableVerticalSwipes) Eitaa.WebApp.disableVerticalSwipes();
+        if (Eitaa.WebApp.setHeaderColor) {
+  const colors = [
+    '#e3f2fd', // آبی خیلی روشن
+    '#bbdefb', // آبی روشن
+    '#cfd8dc', // خاکستری مایل به آبی
+    '#e1f5fe'  // آبی مایل به سفید
+  ];
 
-      // تغییر رنگ هدر به آبی مایل به سفید
-      if (Eitaa.WebApp.setHeaderColor)
-        Eitaa.WebApp.setHeaderColor('#e3f2fd');
-
-      if (Eitaa.WebApp.disableVerticalSwipes)
-        Eitaa.WebApp.disableVerticalSwipes();
+  let i = 0;
+  setInterval(() => {
+    Eitaa.WebApp.setHeaderColor(colors[i]);
+    i = (i + 1) % colors.length;
+  }, 2000); // هر ۲ ثانیه
+        }
 
       Eitaa.WebApp.onEvent('backButtonClicked', () => {
         if (history.length > 1) history.back();
