@@ -6,38 +6,45 @@
     	 <script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
     <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // چک می‌کند که SDK لود شده باشد
-  if (typeof window.Eitaa === "undefined" || !Eitaa.WebApp) {
-    console.warn("Eitaa.SDK not available — make sure this is inside Eitaa WebApp");
+
+  if (!window.Eitaa || !Eitaa.WebApp) {
+    console.warn("Eitaa WebApp SDK not available");
     return;
   }
 
   const app = Eitaa.WebApp;
 
-  // به ایتا می‌گوید صفحه آماده است
+  /* آماده‌سازی */
   app.ready();
 
-  // تمام صفحه کردن WebApp
-  if (app.expand) app.expand();
+  /* فول‌اسکرین واقعی (بعد از تعامل کاربر) */
+  document.addEventListener("click", () => {
+    app.requestFullscreen?.();
+  }, { once: true });
 
-  // غیرفعال کردن سوایپ عمودی (اختیاری)
-  if (app.disableVerticalSwipes) app.disableVerticalSwipes();
+  /* بستن سوایپ عمودی */
+  app.disableVerticalSwipes?.();
 
-  // مدیریت دکمه برگشت
-  app.onEvent("backButtonClicked", () => {
-    if (history.length > 1) {
-      history.back();
-    } else {
-      app.close();
-    }
+  /* رنگ هدر */
+  app.setHeaderColor("#E3F2FD");
+
+  /* دکمه برگشت ایتا */
+  app.BackButton.show();
+
+  app.BackButton.onClick(() => {
+    app.showConfirm(
+      "خروج",
+      "آیا مطمئن هستید که می‌خواهید خارج شوید؟",
+      (ok) => {
+        if (ok) {
+          app.close();
+        }
+      }
+    );
   });
 
-  // مثال: تغییر رنگ هدر
-  if (app.setHeaderColor) {
-    app.setHeaderColor("#eb4f34"); 
-  }
 });
-</script>
+    </script>
     <title>سودوکو</title>
     <style>
         :root {
