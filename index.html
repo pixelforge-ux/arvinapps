@@ -10,31 +10,37 @@ document.addEventListener("DOMContentLoaded", () => {
   try {
     if (window.Eitaa && Eitaa.WebApp) {
       Eitaa.WebApp.ready();
-      if (Eitaa.WebApp.expand) Eitaa.WebApp.expand();
-      if (Eitaa.WebApp.disableVerticalSwipes) Eitaa.WebApp.disableVerticalSwipes();
-        if (Eitaa.WebApp.setHeaderColor) {
-  const colors = [
-    '#e3f2fd', // آبی خیلی روشن
-    '#bbdefb', // آبی روشن
-    '#cfd8dc', // خاکستری مایل به آبی
-    '#e1f5fe'  // آبی مایل به سفید
-  ];
 
-  let i = 0;
-  setInterval(() => {
-    Eitaa.WebApp.setHeaderColor(colors[i]);
-    i = (i + 1) % colors.length;
-  }, 2000); // هر ۲ ثانیه
-        }
+      // تمام صفحه شدن
+      if (Eitaa.WebApp.expand)
+        Eitaa.WebApp.expand();
 
+      // تغییر رنگ هدر به آبی مایل به سفید (ثابت)
+      if (Eitaa.WebApp.setHeaderColor)
+        Eitaa.WebApp.setHeaderColor('#e3f2fd');
+
+      // تایید قبل از بستن WebApp
+      if (Eitaa.WebApp.enableClosingConfirmation)
+        Eitaa.WebApp.enableClosingConfirmation();
+
+      // غیرفعال کردن سوایپ عمودی (اگر پشتیبانی شود)
+      if (Eitaa.WebApp.disableVerticalSwipes)
+        Eitaa.WebApp.disableVerticalSwipes();
+
+      // دکمه بک
       Eitaa.WebApp.onEvent('backButtonClicked', () => {
-        if (history.length > 1) history.back();
-        else Eitaa.WebApp.close();
+        if (history.length > 1) {
+          history.back();
+        } else {
+          Eitaa.WebApp.close();
+        }
       });
     }
-  } catch(e) { console.warn(e); }
+  } catch (e) {
+    console.warn(e);
+  }
 });
-</script>
+          </script>
     <title>سودوکو</title>
     <style>
         :root {
