@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>بازی و برنامه</title>
+    <script type="importmap">
+        {
+            "imports": {
+                "lucide-react": "https://esm.sh/lucide-react@0.292.0",
+                "react": "https://esm.sh/react@18.2.0",
+                "react-dom": "https://esm.sh/react-dom@18.2.0",
+                "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+                "htm": "https://esm.sh/htm@3.1.1"
+            }
+        }
+    </script>
+    <style>
+        @font-face {
+            font-family: 'Vazir';
+            src: url('https://cdnjs.cloudflare.com/ajax/libs/vazir-font/30.1.0/Vazir-Bold.woff2') format('woff2');
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Vazir', sans-serif;
+            background: #020617;
+            color: #f8fafc;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior: none;
+        }
+
+        #root {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .scroll-container {
+            height: 100vh;
+            width: 100%;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            scroll-snap-type: y mandatory;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            perspective: 1200px;
+            touch-action: pan-y;
+        }
+
+        .scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .game-section {
+            height: 100vh;
+            width: 100vw;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transform-style: preserve-3d;
+            overflow: hidden;
+        }
+
+        .card-container {
+            width: 80%;
+            max-width: 400px;
+            aspect-ratio: 1/1.4;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+        }
+
+        .game-card {
+            width: 100%;
+            height: 100%;
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(20px);
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transform: translateZ(0);
+        }
+
+        .image-container {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .game-footer {
+            padding: 20px 20px 30px;
+            text-align: center;
+            background: linear-gradient(to top, rgba(15, 23, 42, 0.95), transparent);
+        }
+
+        .game-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .rating-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .stars-row {
+            display: flex;
+            gap: 4px;
+            direction: ltr;
+        }
+
+        .star-icon {
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.2s;
+            padding: 4px;
+        }
+
+        .star-icon:active {
+            transform: scale(1.4);
+            color: #fbbf24;
+        }
+
+        .avg-rating {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .rating-count {
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+
+        .play-btn {
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            border: none;
+            padding: 12px 40px;
+            border-radius: 50px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 10px 20px -5px rgba(56, 189, 248, 0.5);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 auto;
+        }
+
+        .bg-glow {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.2) 0%, transparent 70%);
+            filter: blur(50px);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .webview-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 1000;
+            transform: translateY(100%);
+            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .webview-container.active {
+            transform: translateY(0);
+        }
+
+        .webview-header {
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            background: #0f172a;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .back-button {
+            background: #1e293b;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        iframe {
+            width: 100%;
+            flex-grow: 1;
+            border: none;
+            background: white;
+        }
+
+        .indicator {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        .indicator-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .indicator-dot.active {
+            height: 24px;
+            background: #38bdf8;
+            border-radius: 4px;
+        }
+
+        .header-top {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 100;
+            pointer-events: auto;
+            background: linear-gradient(to bottom, #020617 60%, transparent);
+        }
+
+        .header-top h1 {
+            margin: 0 0 15px 0;
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #38bdf8;
+            text-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+        }
+
+        .search-container {
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 10px 40px 10px 15px;
+            color: white;
+            font-family: 'Vazir', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            pointer-events: none;
+        }
+
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #020617;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            transition: opacity 0.8s ease, visibility 0.8s;
+        }
+
+        .splash-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .splash-logo {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.5));
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .loader {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(56, 189, 248, 0.1);
+            border-left-color: #38bdf8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .no-results {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="module">
+        import React, { useState, useEffect, useRef } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import htm from 'htm';
+        import { ChevronLeft, Play, LayoutGrid, Gamepad2, Star, Search } from 'lucide-react';
+
+        const html = htm.bind(React.createElement);
+
+        const initialGames = [
+            { id: 1, name: 'دوز نئونی', url: 'https://pixelforge-ux.github.io/Game/', image: 'tic-tac-toe.png', rating: 4.8, totalVotes: 1240 },
+            { id: 2, name: '۲۰۴۸ طلایی', url: 'https://pixelforge-ux.github.io/2048/', image: '2048.png', rating: 4.9, totalVotes: 850 },
+            { id: 3, name: 'پرنده فلپی', url: 'https://pixelforge-ux.github.io/Fllapybird/', image: 'flappy-bird.png', rating: 4.6, totalVotes: 2100 },
+            { id: 4, name: 'سودوکو حرفه‌ای', url: 'https://pixelforge-ux.github.io/soduko/', image: 'sudoku.png', rating: 4.7, totalVotes: 640 },
+            { id: 5, name: 'نقطه و خط', url: 'https://pixelforge-ux.github.io/dots/', image: 'dots.png', rating: 4.5, totalVotes: 430 },
+            { id: 6, name: 'چهار برگ', url: 'https://pixelforge-ux.github.io/chahar-barg/', image: 'chahar-barg.png', rating: 4.9, totalVotes: 3200 },
+            { id: 7, name: 'لرنیتا', url: 'https://pixelforge-ux.github.io/Learneitaa/', image: 'learn-app.png', rating: 4.8, totalVotes: 1500 },
+            { id: 8, name: 'بازی حافظه', url: 'https://pixelforge-ux.github.io/Hafezeh/', image: 'memory-game.png', rating: 4.7, totalVotes: 780 }
+        ];
+
+        // Create a circular array for infinite feel
+        const REPEAT_COUNT = 10;
+        const infiniteGamesTemplate = Array(REPEAT_COUNT).fill(initialGames).flat();
+
+        const App = () => {
+            const [games, setGames] = useState(initialGames);
+            const [searchQuery, setSearchQuery] = useState('');
+            const [isLoading, setIsLoading] = useState(true);
+            const [userRatings, setUserRatings] = useState({});
+            const [activeGame, setActiveGame] = useState(null);
+            const [isViewOpen, setIsViewOpen] = useState(false);
+            const [scrollPos, setScrollPos] = useState(0);
+            const [currentIndex, setCurrentIndex] = useState(0);
+            const containerRef = useRef(null);
+            const audioRef = useRef(null);
+            const autoScrollTimer = useRef(null);
+
+            const filteredGames = games.filter(g => g.name.toLowerCase().includes(searchQuery.toLowerCase()));
+            const infiniteGames = filteredGames.length > 0 ? Array(REPEAT_COUNT).fill(filteredGames).flat() : [];
+
+            useEffect(() => {
+                audioRef.current = new Audio('click.mp3');
+                
+                // Initial jump to middle for infinite scroll
+                const setupScroll = () => {
+                    const container = containerRef.current;
+                    if (container && filteredGames.length > 0) {
+                        const middle = (REPEAT_COUNT / 2) * filteredGames.length * window.innerHeight;
+                        container.scrollTop = middle;
+                    }
+                };
+
+                // Splash screen timeout
+                const timer = setTimeout(() => {
+                    setIsLoading(false);
+                    setupScroll();
+                    startAutoScroll();
+                }, 2500);
+
+                return () => {
+                    clearTimeout(timer);
+                    stopAutoScroll();
+                };
+            }, [searchQuery]);
+
+            const startAutoScroll = () => {
+                stopAutoScroll();
+                if (isViewOpen || filteredGames.length === 0) return;
+                autoScrollTimer.current = setInterval(() => {
+                    if (containerRef.current && !isViewOpen) {
+                        const currentPos = containerRef.current.scrollTop;
+                        const targetPos = currentPos + window.innerHeight;
+                        containerRef.current.scrollTo({
+                            top: targetPos,
+                            behavior: 'smooth'
+                        });
+                    }
+                }, 4000);
+            };
+
+            const stopAutoScroll = () => {
+                if (autoScrollTimer.current) {
+                    clearInterval(autoScrollTimer.current);
+                    autoScrollTimer.current = null;
+                }
+            };
+
+            useEffect(() => {
+                if (isViewOpen) {
+                    stopAutoScroll();
+                } else {
+                    startAutoScroll();
+                }
+            }, [isViewOpen]);
+
+            const handleScroll = (e) => {
+                if (filteredGames.length === 0) return;
+                const scrollTop = e.target.scrollTop;
+                const windowHeight = window.innerHeight;
+                setScrollPos(scrollTop);
+                
+                const index = Math.round(scrollTop / windowHeight);
+                setCurrentIndex(index % filteredGames.length);
+
+                // Infinite loop jump
+                if (scrollTop <= 10) {
+                    e.target.scrollTop = (infiniteGames.length / 2) * windowHeight;
+                } else if (scrollTop >= (infiniteGames.length - 1) * windowHeight - 10) {
+                    e.target.scrollTop = (infiniteGames.length / 2) * windowHeight;
+                }
+            };
+
+            const playClick = () => {
+                if (audioRef.current) {
+                    audioRef.current.currentTime = 0;
+                    audioRef.current.play().catch(() => {});
+                }
+            };
+
+            const handleRate = (e, gameId, score) => {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                playClick();
+                setUserRatings(prev => ({ ...prev, [gameId]: score }));
+                
+                setGames(prevGames => prevGames.map(g => {
+                    if (g.id === gameId) {
+                        const alreadyRated = userRatings[gameId] !== undefined;
+                        if (alreadyRated) return g; // Only allow one vote for visual impact
+                        const newTotal = g.totalVotes + 1;
+                        const newRating = ((g.rating * g.totalVotes) + score) / newTotal;
+                        return { ...g, rating: parseFloat(newRating.toFixed(1)), totalVotes: newTotal };
+                    }
+                    return g;
+                }));
+                
+                // Keep auto-scroll paused longer after a rating
+                stopAutoScroll();
+                setTimeout(startAutoScroll, 6000);
+            };
+
+            const openGame = (game) => {
+                playClick();
+                setActiveGame(game);
+                setIsViewOpen(true);
+            };
+
+            const closeGame = () => {
+                playClick();
+                setIsViewOpen(false);
+                setTimeout(() => setActiveGame(null), 500);
+            };
+
+            return html`
+                <div style=${{ height: '100%', position: 'relative' }}>
+                    <div className=${`splash-screen ${!isLoading ? 'hidden' : ''}`}>
+                        <img src="/file_00000000c5e871f4970bc7454574e585_copy_768x768_copy_384x384.png" className="splash-logo" alt="logo" />
+                        <h1 style=${{ color: 'white', marginBottom: '20px' }}>بازی و برنامه</h1>
+                        <div className="loader"></div>
+                    </div>
+
+                    <div className="bg-glow" style=${{ top: '20%', left: '10%' }} />
+                    <div className="bg-glow" style=${{ bottom: '20%', right: '10%', background: 'radial-gradient(circle, rgba(129, 140, 248, 0.2) 0%, transparent 70%)' }} />
+
+                    <div className="header-top">
+                        <h1>بازی و برنامه</h1>
+                        <div className="search-container">
+                            <${Search} className="search-icon" size=${18} />
+                            <input 
+                                type="text" 
+                                className="search-input" 
+                                placeholder="جستجو در بازی‌ها و برنامه‌ها..." 
+                                value=${searchQuery}
+                                onChange=${(e) => setSearchQuery(e.target.value)}
+                                onClick=${(e) => e.stopPropagation()}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="indicator">
+                        ${filteredGames.map((_, i) => html`
+                            <div key=${i} className=${`indicator-dot ${currentIndex === i ? 'active' : ''}`} />
+                        `)}
+                    </div>
+
+                    <div 
+                        className="scroll-container" 
+                        ref=${containerRef} 
+                        onScroll=${handleScroll}
+                        onTouchStart=${stopAutoScroll}
+                        onTouchEnd=${startAutoScroll}
+                        onMouseDown=${stopAutoScroll}
+                        onMouseUp=${startAutoScroll}
+                    >
+                        ${filteredGames.length === 0 ? html`
+                            <div className="no-results">
+                                <${Search} size=${48} opacity=${0.3} />
+                                <div>موردی یافت نشد</div>
+                            </div>
+                        ` : infiniteGames.map((game, index) => {
+                            const windowHeight = window.innerHeight;
+                            const distance = (index * windowHeight) - scrollPos;
+                            const progress = distance / windowHeight;
+                            
+                            // 3D Transforms based on scroll distance
+                            const rotation = progress * 45; // Degrees
+                            const scale = 1 - Math.abs(progress) * 0.4;
+                            const opacity = 1 - Math.abs(progress) * 0.8;
+                            const translateY = progress * 100;
+
+                            return html`
+                                <section key=${`${index}-${game.id}`} className="game-section">
+                                    <div className="card-container" style=${{
+                                        transform: `rotateX(${rotation}deg) scale(${scale}) translateY(${translateY}px)`,
+                                        opacity: opacity,
+                                        pointerEvents: Math.abs(progress) > 0.8 ? 'none' : 'auto'
+                                    }}>
+                                        <div className="game-card">
+                                            <div className="image-container">
+                                                <img src=${game.image} alt=${game.name} loading="lazy" />
+                                            </div>
+                                            <div className="game-footer">
+                                                <div className="game-title">${game.name}</div>
+                                                
+                                                <div className="rating-container">
+                                                    <div className="stars-row">
+                                                        ${[1, 2, 3, 4, 5].map(star => {
+                                                            const isFilled = (userRatings[game.id] || 0) >= star;
+                                                            return html`
+                                                                <${Star} 
+                                                                    key=${star}
+                                                                    size=${28} 
+                                                                    className="star-icon"
+                                                                    fill=${isFilled ? "#fbbf24" : "none"}
+                                                                    color=${isFilled ? "#fbbf24" : "#475569"}
+                                                                    onClick=${(e) => handleRate(e, game.id, star)}
+                                                                />
+                                                            `;
+                                                        })}
+                                                    </div>
+                                                    <div className="avg-rating">
+                                                        <span style=${{color: '#fbbf24', fontWeight: 'bold'}}>${game.rating}</span>
+                                                        <span className="rating-count">(${game.totalVotes.toLocaleString()} نظر)</span>
+                                                    </div>
+                                                </div>
+
+                                                <button className="play-btn" onClick=${() => openGame(game)}>
+                                                    <${Play} size=${20} fill="currentColor" />
+                                                    <span>شروع بازی</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            `;
+                        })}
+                    </div>
+
+                    <div className=${`webview-container ${isViewOpen ? 'active' : ''}`}>
+                        <div className="webview-header">
+                            <div style=${{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <${Gamepad2} size=${24} color="#38bdf8" />
+                                <span style=${{ fontWeight: 'bold', fontSize: '1.1rem' }}>${activeGame?.name}</span>
+                            </div>
+                            <button className="back-button" onClick=${closeGame}>
+                                <span>بازگشت</span>
+                                <${ChevronLeft} size=${20} />
+                            </button>
+                        </div>
+                        ${activeGame && html`
+                            <iframe 
+                                src=${activeGame.url} 
+                                title=${activeGame.name}
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                            />
+                        `}
+                    </div>
+                </div>
+            `;
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(html`<${App} />`);
+    </script>
+</body>
+</html>
